@@ -68,7 +68,7 @@ def extract_dns_features(pcap_file):
                 else:
                     entropy = shannon_entropy(subdomain) # Checking the entropy of the subdomain
 
-                feature = [pkt_len, inter_arrival, query_len, is_response, record_count, qtype, entropy]
+                feature = [pkt_len, query_len, is_response, record_count, qtype, entropy]
                 features.append(feature)
 
                 # Rule-based labeling heuristic
@@ -77,7 +77,7 @@ def extract_dns_features(pcap_file):
                     score += .75
                 if query_len > 40:
                     score += .5
-                if qtype in [16, 28]:
+                if qtype in [16, 15]: #TXT and MX quer
                     score += .25
                 if subdomain == '':
                     score += .75
@@ -95,7 +95,7 @@ def extract_dns_features(pcap_file):
                 f.write(debug_info + '\n')
 
     feature_columns = [
-        'pkt_len', 'inter_arrival', 'query_len', 'is_response',
+        'pkt_len', 'query_len', 'is_response',
         'record_count', 'qtype', 'entropy'
     ]
     # Compile the features and labels arrays into a csv for machine learning input.
@@ -128,8 +128,8 @@ plt.close()
 
 # Plot Entropy distribution to a png with matplotlib
 plt.figure(figsize=(10, 6))
-plt.hist([f[6] for f, l in zip(X, y) if l == 0], bins=30, alpha=0.7, label='Benign', color='blue')
-plt.hist([f[6] for f, l in zip(X, y) if l == 1], bins=30, alpha=0.7, label='Malicious', color='red')
+plt.hist([f[5] for f, l in zip(X, y) if l == 0], bins=30, alpha=0.7, label='Benign', color='blue')
+plt.hist([f[5] for f, l in zip(X, y) if l == 1], bins=30, alpha=0.7, label='Malicious', color='red')
 plt.xlabel('Subdomain Entropy')
 plt.ylabel('Frequency')
 plt.title('Entropy Distribution')
@@ -172,7 +172,7 @@ class DNSNet(nn.Module):
         x = self.sigmoid(self.fc3(x))
         return x
 
-model = DNSNet(input_size=7) # Set model features quantity
+model = DNSNet(input_size=6) # Set model features quantity
 
 # Step 3: Load Saved Model if one exists
 if os.path.isfile('dns_model.pth'):

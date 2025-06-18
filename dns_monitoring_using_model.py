@@ -39,7 +39,6 @@ def shannon_entropy(text):
 def extract_dns_features_from_packet(pkt):
     if pkt.haslayer('IP') and pkt.haslayer(DNS) and pkt[DNS].qd:
         pkt_len = len(pkt)
-        inter_arrival = 0  # Placeholder for real inter-arrival logic
         query_len = len(pkt[DNS].qd.qname)
         is_response = int(pkt[DNS].qr == 1)
         record_count = pkt[DNS].ancount if is_response else 0
@@ -64,7 +63,7 @@ scaler = StandardScaler()
 scaler.mean_ = np.load("scaler_mean.npy")
 scaler.scale_ = np.load("scaler_scale.npy")
 scaler.var_ = np.load("scaler_var.npy")
-scaler.n_features_in_ = 7
+scaler.n_features_in_ = 6
 
 # Load model
 model = DNSNet(input_size=7)
